@@ -104,8 +104,11 @@ map.on('load', function() {
 			let query = input.val().toLowerCase().replace(/[^a-zA-Z ]/g, "").replace(/\s+/g, "-").trim();
 			return stop.id.includes(query) && query.length > 1;
 		});
-		if(filteredResults.length > 0)
+		if(filteredResults.length > 0) {
 			input.addClass('results');
+			if(filteredResults.length > 8)
+				filteredResults.splice(8, filteredResults.length - 8);
+		}
 		else
 			input.removeClass('results');
 		filteredResults.map(function(stop) {
@@ -117,6 +120,7 @@ map.on('load', function() {
 					zoom: 16
 				});
 				results.html('');
+				input.val(stop.name);
 				input.removeClass('results');
 			});
 			results.append(li);
