@@ -87,7 +87,7 @@ map.on('load', function() {
 	});
 	$('[data-toggle="tooltip"]').tooltip();
 	map.fitBounds([[minLon, minLat], [maxLon, maxLat]], {
-		padding: 30
+		padding: 75
 	});
 	let container = $(document.createElement('div'));
 	container.addClass('mapboxgl-ctrl');
