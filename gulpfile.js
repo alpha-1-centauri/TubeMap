@@ -4,8 +4,8 @@ const fs = require('fs');
 const browserify = require('browserify');
 const sass = require('gulp-sass');
 gulp.task('js', function() {
-	return browserify('src/index.js')
-		.transform("babelify", {presets: ['es2015']})
+	return browserify('src/index.jsx')
+		.transform("babelify", {presets: ['es2015', 'react']})
 		.bundle()
 		.pipe(fs.createWriteStream('build/index.js'));
 });
