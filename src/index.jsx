@@ -34,6 +34,9 @@ class MainPage extends React.Component {
 				<div className="mapboxgl-ctrl-top-left">
 					<Search map={this.getMap()} stops={this.getStops()} />
 				</div>
+				<div className="mapboxgl-ctrl-bottom-right">
+					<Key map={this.getMap()} lines={this.getLines()} />
+				</div>
 			</div>
 		)
 	}
@@ -41,34 +44,36 @@ class MainPage extends React.Component {
 	componentDidMount() {
 		let mainPage = this;
 		this.getMap().on('load', function() {
-			mainPage.getLines().map(function(line, i) {
-				mainPage.getMap().addLayer({
-					"id": i + "-" + line.name,
-					"type": "line",
-					"source": {
-						"type": "geojson",
-						"data": {
-							"type": "Feature",
-							"properties": {},
-							"geometry": {
-								"type": "LineString",
-								"coordinates": line.stops.map(function(item) {
-									let stop = $.grep(mainPage.getStops(), function(e) {
-										return e.id == item;
-									})[0];
-									return [stop.lon, stop.lat];
-								})
+			mainPage.getLines().map(function(line) {
+				line.stops.map(function(lineStops, i) {
+					mainPage.getMap().addLayer({
+						"id": line.id + "-" + i,
+						"type": "line",
+						"source": {
+							"type": "geojson",
+							"data": {
+								"type": "Feature",
+								"properties": {},
+								"geometry": {
+									"type": "LineString",
+									"coordinates": lineStops.map(function(item) {
+										let stop = $.grep(mainPage.getStops(), function(e) {
+											return e.id == item;
+										})[0];
+										return [stop.lon, stop.lat];
+									})
+								}
 							}
+						},
+						"layout": {
+							"line-cap": "round",
+							"line-join": "round"
+						},
+						"paint": {
+							"line-color": line.color,
+							"line-width": 2
 						}
-					},
-					"layout": {
-						"line-cap": "round",
-						"line-join": "round"
-					},
-					"paint": {
-						"line-color": line.color,
-						"line-width": 2
-					}
+					});
 				});
 			});
 			const markerDiameter = 8;
@@ -136,8 +141,8 @@ class Search extends React.Component {
 	
 	render() {
 		return (
-			<div className="mapboxgl-ctrl">
-				<input className={"form-control form-control-lg" + ((this.getResultsCount() > 0) ? " results" : "")} type="text" value={this.state.value} title="Search" placeholder="Search" onChange={this.calcResults.bind(this)} />
+			<div className={"mapboxgl-ctrl" + ((this.getResultsCount() > 0) ? " results" : "")} id="search">
+				<input className="form-control form-control-lg" type="text" value={this.state.value} title="Search" placeholder="Search" onChange={this.calcResults.bind(this)} />
 				<ul className="search-results">
 					{this.getSearchResults()}
 				</ul>
@@ -193,6 +198,58 @@ class Search extends React.Component {
 	
 	getStops() {
 		return this.props.stops;
+	}
+}
+class Key extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			expanded: false,
+			selected: undefined
+		}
+	}
+	
+	render() {
+		return (
+			<div className={"mapboxgl-ctrl" + (this.getExpanded() ? " expanded" : "")} id="key">
+				<ul id="lines">
+					{this.getLineElements()}
+				</ul>
+				<div id="toggleButton" onClick={this.toggleExpanded.bind(this)}>
+					<h5>Key</h5>
+					<i className="material-icons" onClick={this.toggleExpanded.bind(this)}>{this.getExpanded() ? "keyboard_arrow_down" : "keyboard_arrow_up"}</i>
+				</div>
+			</div>
+		);
+	}
+	
+	getLineElements() {
+		if(this.getExpanded())
+			return this.getLines().map(function(line, i) {
+				const style = {
+					backgroundColor: line.color
+				};
+				return (
+					<li key={i}>
+						<div className="line-indicator" style={style} />
+						<h6>{line.name}</h6>
+					</li>
+				)
+			});
+	}
+	
+	toggleExpanded() {
+		this.setState({
+			expanded: !this.getExpanded()
+		})
+	}
+	
+	getExpanded() {
+		return this.state.expanded
+	}
+	
+	getLines() {
+		return this.props.lines;
 	}
 }
 ReactDOM.render(<MainPage />, $('#root')[0]);
