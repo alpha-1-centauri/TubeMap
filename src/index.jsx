@@ -35,7 +35,7 @@ class MainPage extends React.Component {
 					<Search map={this.getMap()} stops={this.getStops()} />
 				</div>
 				<div className="mapboxgl-ctrl-bottom-right">
-					<Key map={this.getMap()} lines={this.getLines()} />
+					<Key map={this.getMap()} stops={this.getStops()} lines={this.getLines()} />
 				</div>
 			</div>
 		)
@@ -48,6 +48,7 @@ class MainPage extends React.Component {
 				line.stops.map(function(lineStops, i) {
 					mainPage.getMap().addLayer({
 						"id": line.id + "-" + i,
+						"line": line.id,
 						"type": "line",
 						"source": {
 							"type": "geojson",
@@ -95,6 +96,7 @@ class MainPage extends React.Component {
 				el.title = stop.name;
 				$(el).attr('data-toggle', 'tooltip');
 				$(el).attr('data-placement', 'top');
+				$(el).attr('data-stop', stop.id);
 				new mapboxgl.Marker(el, {offset: [(-markerDiameter / 2) - markerBorder, (-markerDiameter / 2) - markerBorder]})
 					.setLngLat([stop.lon, stop.lat])
 					.addTo(mainPage.getMap());
@@ -224,13 +226,14 @@ class Key extends React.Component {
 	}
 	
 	getLineElements() {
+		let key = this;
 		if(this.getExpanded())
 			return this.getLines().map(function(line, i) {
 				const style = {
 					backgroundColor: line.color
 				};
 				return (
-					<li key={i}>
+					<li key={i} onClick={key.focusLine.bind(key, line)} onMouseEnter={key.setMapFilter.bind(key, line)} onMouseLeave={key.removeMapFilter.bind(key)}>
 						<div className="line-indicator" style={style} />
 						<h6>{line.name}</h6>
 					</li>
@@ -241,11 +244,85 @@ class Key extends React.Component {
 	toggleExpanded() {
 		this.setState({
 			expanded: !this.getExpanded()
-		})
+		});
+	}
+	
+	focusLine(line) {
+		let key = this;
+		let stops = [];
+		line.stops.map(function(lineStops) {
+			stops = stops.concat($.grep(key.getStops(), function(stop) {
+				return lineStops.includes(stop.id);
+			}));
+		});
+		let minLon = stops[0].lon;
+		let maxLon = stops[0].lon;
+		let minLat = stops[0].lat;
+		let maxLat = stops[0].lat;
+		stops.map(function(stop) {
+			if(stop.lon < minLon) {
+				minLon = stop.lon;
+			}
+			if(stop.lon > maxLon) {
+				maxLon = stop.lon;
+			}
+			if(stop.lat < minLat) {
+				minLat = stop.lat;
+			}
+			if(stop.lat > maxLat) {
+				maxLat = stop.lat;
+			}
+		});
+		this.getMap().fitBounds([[minLon, minLat], [maxLon, maxLat]], {
+			padding: 75
+		});
+	}
+	
+	setMapFilter(line) {
+		let key = this;
+		this.getLineLayerNames().filter(function(lineLayer) {
+			return !lineLayer.includes(line.id);
+		}).map(function(lineLayer) {
+			key.getMap().setFilter(lineLayer, ["==", "name", ""]);
+		});
+		$('.marker.mapboxgl-marker').css('display', 'none')
+			.map(function() {
+				let stop = this;
+				line.stops.map(function(stops) {
+					if(stops.includes($(stop).attr("data-stop")))
+						$(stop).css('display', 'block');
+				});
+			});
+	}
+	
+	removeMapFilter() {
+		let key = this;
+		this.getLineLayerNames().map(function(lineLayer) {
+			key.getMap().setFilter(lineLayer, ["all"]);
+		});
+		$('.marker.mapboxgl-marker').css('display', 'block');
+	}
+	
+	getLineLayerNames() {
+		let names = [];
+		this.getLines().map(function(line) {
+			for(let i = 0; i < line.stops.length; i++) {
+				names.push(line.id + "-" + i);
+			}
+		});
+		return names;
 	}
 	
 	getExpanded() {
 		return this.state.expanded
+	}
+	
+	getMap() {
+		return this.props.map;
+	}
+	
+	getStops() {
+		return this.props.stops;
 	}
 	
 	getLines() {
