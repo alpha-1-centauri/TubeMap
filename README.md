@@ -3,6 +3,8 @@
 
 # TubeMap
 
+![TubeMap Screenshot](http://i.imgur.com/cSAJSwb.png)
+
 TubeMap is an interactive web-based map, of the London Underground.
 
 ## Requirements
