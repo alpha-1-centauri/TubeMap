@@ -1,17 +1,18 @@
 "use strict";
-let env = require('./../env.json');
-let React = require('react');
-let ReactDOM = require('react-dom');
-let $ = require('jquery');
+const env = require('./../env.json'),
+	React = require('react'),
+	ReactDOM = require('react-dom'),
+	PropTypes = require('proptypes'),
+	$ = require('jquery');
 global.jQuery = $;
 global.Tether = require('tether');
 require('bootstrap');
-let mapboxgl = require('mapbox-gl');
-let data = require('./data.json');
+const mapboxgl = require('mapbox-gl'),
+	data = require('./data.json');
 class MainPage extends React.Component {
 	constructor(props) {
 		super(props);
-		mapboxgl.accessToken = env.mapbox;
+		mapboxgl.accessToken = this.props.mapboxKey;
 		this.state = {
 			map: new mapboxgl.Map({
 				container: 'map',
@@ -22,9 +23,7 @@ class MainPage extends React.Component {
 				minZoom: 1,
 				dragRotate: false
 			}).addControl(new mapboxgl.NavigationControl())
-				.addControl(new mapboxgl.ScaleControl()),
-			lines: data.lines,
-			stops: data.stops
+				.addControl(new mapboxgl.ScaleControl())
 		}
 	}
 	
@@ -59,7 +58,7 @@ class MainPage extends React.Component {
 									"type": "LineString",
 									"coordinates": lineStops.map(function(item) {
 										let stop = $.grep(mainPage.getStops(), function(e) {
-											return e.id == item;
+											return e.id === item;
 										})[0];
 										return [stop.lon, stop.lat];
 									})
@@ -125,13 +124,17 @@ class MainPage extends React.Component {
 	}
 	
 	getLines() {
-		return this.state.lines;
+		return this.props.data.lines;
 	}
 	
 	getStops() {
-		return this.state.stops;
+		return this.props.data.stops;
 	}
 }
+MainPage.propTypes = {
+	mapboxKey: PropTypes.string.isRequired,
+	data: PropTypes.object.isRequired
+};
 class Search extends React.Component {
 	constructor(props) {
 		super(props);
@@ -202,6 +205,10 @@ class Search extends React.Component {
 		return this.props.stops;
 	}
 }
+Search.propTypes = {
+	map: PropTypes.instanceOf(mapboxgl.Map).isRequired,
+	stops: PropTypes.array.isRequired
+};
 class Key extends React.Component {
 	constructor(props) {
 		super(props);
@@ -329,4 +336,9 @@ class Key extends React.Component {
 		return this.props.lines;
 	}
 }
-ReactDOM.render(<MainPage />, $('#root')[0]);
+Key.propTypes = {
+	map: PropTypes.instanceOf(mapboxgl.Map).isRequired,
+	stops: PropTypes.array.isRequired,
+	lines: PropTypes.arrayOf(PropTypes.object).isRequired
+};
+ReactDOM.render(<MainPage mapboxKey={env.mapbox} data={data} />, $('#root')[0]);

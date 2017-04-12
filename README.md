@@ -1,3 +1,6 @@
+[![Code Climate](https://codeclimate.com/github/elliotleelewis/TubeMap/badges/gpa.svg)](https://codeclimate.com/github/elliotleelewis/TubeMap)
+![Dependencies](https://david-dm.org/elliotleelewis/TubeMap.svg)
+
 # TubeMap
 
 TubeMap is an interactive web-based map, of the London Underground.
@@ -12,4 +15,4 @@ TubeMap is an interactive web-based map, of the London Underground.
 * Sign up for a [Mapbox](https://www.mapbox.com/) key,  and add it to `env.json`
 * Run `npm install`
 * Run `npm start` or `gulp`
-* Open `index.htm` in a browser
+* Open `index.html` in a browser
