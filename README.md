@@ -1,5 +1,6 @@
 [![Code Climate](https://codeclimate.com/github/elliotleelewis/TubeMap/badges/gpa.svg)](https://codeclimate.com/github/elliotleelewis/TubeMap)
-![Dependencies](https://david-dm.org/elliotleelewis/TubeMap.svg)
+[![Dependencies](https://david-dm.org/elliotleelewis/TubeMap.svg)](https://david-dm.org/elliotleelewis/TubeMap)
+[![DevDependencies](https://david-dm.org/elliotleelewis/TubeMap/dev-status.svg)](https://david-dm.org/elliotleelewis/TubeMap?type=dev)
 
 # TubeMap
 
